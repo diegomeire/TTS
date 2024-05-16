@@ -1,6 +1,8 @@
 #!flask/bin/python
+import torch
 import argparse
 import io
+import wave
 import json
 import os
 import sys
@@ -10,11 +12,11 @@ from typing import Union
 from urllib.parse import parse_qs
 
 from flask import Flask, render_template, render_template_string, request, send_file
-
+from TTS.utils.audio.numpy_transforms import save_wav
 from TTS.config import load_config
 from TTS.utils.manage import ModelManager
 from TTS.utils.synthesizer import Synthesizer
-
+from TTS.api import TTS
 
 def create_argparser():
     def convert_boolean(x):
@@ -100,31 +102,27 @@ if args.vocoder_path is not None:
     vocoder_path = args.vocoder_path
     vocoder_config_path = args.vocoder_config_path
 
-# load models
-synthesizer = Synthesizer(
-    tts_checkpoint=model_path,
-    tts_config_path=config_path,
-    tts_speakers_file=speakers_file_path,
-    tts_languages_file=None,
-    vocoder_checkpoint=vocoder_path,
-    vocoder_config=vocoder_config_path,
-    encoder_checkpoint="",
-    encoder_config="",
-    use_cuda=args.use_cuda,
-)
 
-use_multi_speaker = hasattr(synthesizer.tts_model, "num_speakers") and (
-    synthesizer.tts_model.num_speakers > 1 or synthesizer.tts_speakers_file is not None
-)
-speaker_manager = getattr(synthesizer.tts_model, "speaker_manager", None)
 
-use_multi_language = hasattr(synthesizer.tts_model, "num_languages") and (
-    synthesizer.tts_model.num_languages > 1 or synthesizer.tts_languages_file is not None
-)
-language_manager = getattr(synthesizer.tts_model, "language_manager", None)
+
+        
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+api_tts = TTS(args.model_name).to(device)
+
+vc_model_path, vc_config_path, _, _, _ = api_tts.download_model_by_name("voice_conversion_models/multilingual/vctk/freevc24")
+voice_converter = Synthesizer(vc_checkpoint=vc_model_path, vc_config=vc_config_path, use_cuda=args.use_cuda)
+
+
+use_multi_speaker = api_tts.is_multi_speaker 
+speaker_manager = api_tts.speaker_manager
+
+use_multi_language = api_tts.is_multi_lingual
+
+language_manager = api_tts.language_manager 
 
 # TODO: set this from SpeakerManager
-use_gst = synthesizer.tts_config.get("use_gst", False)
+use_gst = False #synthesizer.tts_config.get("use_gst", False)
 app = Flask(__name__)
 
 
@@ -196,14 +194,48 @@ def tts():
         language_idx = request.headers.get("language-id") or request.values.get("language_id", "")
         style_wav = request.headers.get("style-wav") or request.values.get("style_wav", "")
         style_wav = style_wav_uri_to_dict(style_wav)
+        speaker_wav = request.headers.get("speaker-wav") or request.values.get("speaker_wav", "")
+        speed = request.headers.get("speed") or request.values.get("speed", "")
+        if (speed == ""): speed = 1.0
 
         print(f" > Model input: {text}")
         print(f" > Speaker Idx: {speaker_idx}")
         print(f" > Language Idx: {language_idx}")
-        wavs = synthesizer.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
-        out = io.BytesIO()
-        synthesizer.save_wav(wavs, out)
-    return send_file(out, mimetype="audio/wav")
+
+        print(f" > Speaker Wav: {speaker_wav}")
+        print(f" > Style Wav: {style_wav}")
+
+        convert_audio = False
+        if ('xtts' in args.model_name):
+            if (speaker_wav != ""): speaker_idx = None
+            else: 
+                if (speaker_idx != ""): speaker_wav = None
+        else:
+            if (speaker_wav != ""):
+                convert_audio = True
+ 
+        print(convert_audio)
+        
+ 
+        file_path = "output.wav"
+        
+        if (api_tts.is_multi_lingual==False): language_idx=None
+        
+        if (convert_audio):
+            api_tts.tts_to_file( text=text, speaker=speaker_idx, file_path="temp.wav", language=language_idx, split_sentences=True, speed=speed)
+        else:
+            api_tts.tts_to_file( text=text, speaker=speaker_idx, speaker_wav=speaker_wav, file_path=file_path, language=language_idx, split_sentences=True, speed=speed)
+        
+        
+        if (convert_audio):
+            converted_wav = voice_converter.voice_conversion("temp.wav", speaker_wav)
+            
+            save_wav(wav=converted_wav, path=file_path, sample_rate=voice_converter.vc_config.audio.output_sample_rate)
+            
+            #voice_converter.save_wav(wav=converted_wav, path=file_path, pipe_out=None)
+        
+        return send_file(file_path, mimetype="audio/wav") 
+
 
 
 # Basic MaryTTS compatibility layer
@@ -244,9 +276,9 @@ def mary_tts_api_process():
         else:
             text = request.args.get("INPUT_TEXT", "")
         print(f" > Model input: {text}")
-        wavs = synthesizer.tts(text)
+        wavs = api_tts.tts(text)
         out = io.BytesIO()
-        synthesizer.save_wav(wavs, out)
+        voice_converter.save_wav(wavs, out)
     return send_file(out, mimetype="audio/wav")
 
 

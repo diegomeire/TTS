@@ -69,8 +69,11 @@
                     type="text" name="style_wav">
                 {%endif%}
 
-                <input id="text" placeholder="Type here..." size=45 type="text" name="text">
-                <button id="speak-button" name="speak">Speak</button><br /><br />
+
+                Type a text to generate:
+                <input id="text" placeholder="Type the text to generate speech..." size=45 type="text" name="text"> <br/><br/>
+				
+				
 
                 {%if use_multi_speaker%}
                 Choose a speaker:
@@ -78,7 +81,13 @@
                     {% for speaker_id in speaker_ids %}
                     <option value="{{speaker_id}}" SELECTED>{{speaker_id}}</option>"
                     {% endfor %}
-                </select><br /><br />
+                </select> or
+				<br/>
+                <input id="speaker_wav" placeholder="Type the path to the speaker reference wav file" size=45 type="text" name="speaker_wav">
+				
+                
+				
+				<br /><br />
                 {%endif%}
 
                 {%if use_multi_language%}
@@ -91,6 +100,10 @@
                 {%endif%}
 
 
+
+				
+                <button id="speak-button" name="speak">Speak</button><br/><br/><br/><br/>
+				
                 {%if show_details%}
                 <button id="details-button" onclick="location.href = 'details'" name="model-details">Model
                     Details</button><br /><br />
@@ -115,13 +128,14 @@
         function do_tts(e) {
             const text = q('#text').value
             const speaker_id = getTextValue('#speaker_id')
+			const speaker_wav = getTextValue('#speaker_wav')
             const style_wav = getTextValue('#style_wav')
             const language_id = getTextValue('#language_id')
             if (text) {
                 q('#message').textContent = 'Synthesizing...'
                 q('#speak-button').disabled = true
                 q('#audio').hidden = true
-                synthesize(text, speaker_id, style_wav, language_id)
+                synthesize(text, speaker_id, style_wav, language_id, speaker_wav)
             }
             e.preventDefault()
             return false
@@ -132,8 +146,8 @@
                 do_tts(e)
             }
         })
-        function synthesize(text, speaker_id = "", style_wav = "", language_id = "") {
-            fetch(`/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&style_wav=${encodeURIComponent(style_wav)}&language_id=${encodeURIComponent(language_id)}`, { cache: 'no-cache' })
+        function synthesize(text, speaker_id = "", style_wav = "", language_id = "", speaker_wav = "") {
+            fetch(`/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&style_wav=${encodeURIComponent(style_wav)}&language_id=${encodeURIComponent(language_id)}&speaker_wav=${encodeURIComponent(speaker_wav)}`, { cache: 'no-cache' })
                 .then(function (res) {
                     if (!res.ok) throw Error(res.statusText)
                     return res.blob()

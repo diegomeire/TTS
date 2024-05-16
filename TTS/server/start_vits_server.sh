@@ -1,0 +1,1 @@
+python server.py --model_name="tts_models/en/vctk/vits" --show_details=True

@@ -85,6 +85,17 @@ class TTS(nn.Module):
     @property
     def models(self):
         return self.manager.list_tts_models()
+        
+    @property
+    def speaker_manager(self):
+        if hasattr(self.synthesizer.tts_model, "speaker_manager") and self.synthesizer.tts_model.speaker_manager:
+            return self.synthesizer.tts_model.speaker_manager
+        return None
+
+        
+    @property
+    def language_manager(self):
+        return self.synthesizer.tts_model.language_manager
 
     @property
     def is_multi_speaker(self):
@@ -171,7 +182,7 @@ class TTS(nn.Module):
         model_path, config_path, vocoder_path, vocoder_config_path, model_dir = self.download_model_by_name(
             model_name
         )
-
+     
         # init synthesizer
         # None values are fetch from the model
         self.synthesizer = Synthesizer(
@@ -202,7 +213,7 @@ class TTS(nn.Module):
 
         self.synthesizer = Synthesizer(
             tts_checkpoint=model_path,
-            tts_config_path=config_path,
+            model_path=config_path,
             tts_speakers_file=None,
             tts_languages_file=None,
             vocoder_checkpoint=vocoder_path,
@@ -241,7 +252,7 @@ class TTS(nn.Module):
         language: str = None,
         speaker_wav: str = None,
         emotion: str = None,
-        speed: float = None,
+        speed: float = 1.0,
         split_sentences: bool = True,
         **kwargs,
     ):
@@ -283,6 +294,7 @@ class TTS(nn.Module):
             style_text=None,
             reference_speaker_name=None,
             split_sentences=split_sentences,
+            speed=speed,
             **kwargs,
         )
         return wav
@@ -337,6 +349,7 @@ class TTS(nn.Module):
             language=language,
             speaker_wav=speaker_wav,
             split_sentences=split_sentences,
+            speed=speed,
             **kwargs,
         )
         self.synthesizer.save_wav(wav=wav, path=file_path, pipe_out=pipe_out)
@@ -385,6 +398,7 @@ class TTS(nn.Module):
         speaker_wav: str = None,
         speaker: str = None,
         split_sentences: bool = True,
+        speed: int = 1.0
     ):
         """Convert text to speech with voice conversion.
 
@@ -413,7 +427,7 @@ class TTS(nn.Module):
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as fp:
             # Lazy code... save it to a temp file to resample it while reading it for VC
             self.tts_to_file(
-                text=text, speaker=speaker, language=language, file_path=fp.name, split_sentences=split_sentences
+                text=text, speaker=speaker, language=language, file_path=fp.name, split_sentences=split_sentences, speed=speed
             )
         if self.voice_converter is None:
             self.load_vc_model_by_name("voice_conversion_models/multilingual/vctk/freevc24")

@@ -158,6 +158,7 @@ class Synthesizer(nn.Module):
 
         We assume the model knows how to load itself from the directory and there is a config.json file in the directory.
         """
+        print("loading config")
         config = load_config(os.path.join(model_dir, "config.json"))
         self.tts_config = config
         self.tts_model = setup_tts_model(config)

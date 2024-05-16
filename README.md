@@ -19,7 +19,7 @@ To run this, you must clone from this repo and install TTS from here as it chang
 
 ```bash
 git clone https://github.com/diegomeire/TTS
-pip install -e .[all,dev,notebooks]  # Select the relevant extras
+pip install -e .  # Select the relevant extras
 ```
 
 

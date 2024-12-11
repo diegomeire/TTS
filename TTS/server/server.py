@@ -217,9 +217,8 @@ def tts():
         print(convert_audio)
         
  
-        file_path = "output.wav"
+        file_path = "output.wav" 
         
-        print(speaker_idx)
         
         if (api_tts.is_multi_lingual==False): language_idx=None
         

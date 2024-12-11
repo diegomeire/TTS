@@ -226,6 +226,15 @@
                     "license": "apache 2.0",
                     "contact": "egolge@coqui.ai"
                 },
+				"mark": {
+                    "description": "VITS End2End TTS model trained on VCTK dataset with 109 different speakers with EN accent.",
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--en--vctk--vits.zip",
+                    "default_vocoder": null,
+                    "commit": "3900448",
+                    "author": "Diego Meire",
+                    "license": "apache 2.0",
+                    "contact": "egolge@coqui.ai"
+				},
                 "fast_pitch": {
                     "description": "FastPitch model trained on VCTK dataseset.",
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--en--vctk--fast_pitch.zip",

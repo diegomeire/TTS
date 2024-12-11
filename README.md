@@ -1,4 +1,24 @@
 
+This is a fork of https://github.com/coqui-ai/TTS
+
+______________________________________________________________________
+
+## <img src="https://raw.githubusercontent.com/coqui-ai/TTS/main/images/coqui-log-green-TTS.png" height="56"/>
+______________________________________________________________________
+
+## <img src="Screenshot_01.jpg" height="56"/>
+
+
+This adds an improved server.py, where you can refer to a local wav file for voice cloning either running XTTS or Vits:
+
+
+
+
+
+______________________________________________________________________
+Please refer to the original repository for more information
+
+
 ## 🐸Coqui.ai News
 - 📣 ⓍTTSv2 is here with 16 languages and better performance across the board.
 - 📣 ⓍTTS fine-tuning code is out. Check the [example recipes](https://github.com/coqui-ai/TTS/tree/dev/recipes/ljspeech).

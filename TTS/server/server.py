@@ -219,12 +219,20 @@ def tts():
  
         file_path = "output.wav"
         
+        print(speaker_idx)
+        
         if (api_tts.is_multi_lingual==False): language_idx=None
         
         if (convert_audio):
-            api_tts.tts_to_file( text=text, speaker=speaker_idx, file_path="temp.wav", language=language_idx, split_sentences=True, speed=speed)
+            if (speaker_idx != ""):
+               api_tts.tts_to_file( text=text, speaker=speaker_idx, file_path="temp.wav", language=language_idx, split_sentences=True, speed=speed)
+            else:
+               api_tts.tts_to_file( text=text, file_path="temp.wav", language=language_idx, split_sentences=True, speed=speed)
         else:
-            api_tts.tts_to_file( text=text, speaker=speaker_idx, speaker_wav=speaker_wav, file_path=file_path, language=language_idx, split_sentences=True, speed=speed)
+            if (speaker_idx != ""):
+               api_tts.tts_to_file( text=text, speaker=speaker_idx, speaker_wav=speaker_wav, file_path=file_path, language=language_idx, split_sentences=True, speed=speed)
+            else:
+               api_tts.tts_to_file( text=text, speaker_wav=speaker_wav, file_path=file_path, language=language_idx, split_sentences=True, speed=speed)
         
         
         if (convert_audio):

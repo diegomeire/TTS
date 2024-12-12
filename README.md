@@ -60,15 +60,15 @@ pip install -e .  # Select the relevant extras
 #### using CPU
 ```
 cd /TTS/server
-python server.py --model_name="tts_models/multilingual/multi-dataset/xtts_v2" --model_path="/Users/diegomeire//Library/Application Support/tts/tts_models--multilingual--multi-dataset--xtts_v2" --config_path="/Users/diegomeire//Library/Application Support/tts/tts_models--multilingual--multi-dataset--xtts_v2/config.json" --show_details=True  --use_cuda=False
+python server.py --model_name="tts_models/multilingual/multi-dataset/xtts_v2" --show_details=True  --use_cuda=False
 ```
 #### using GPU
 ```
 cd /TTS/server
-python server.py --model_name="tts_models/multilingual/multi-dataset/xtts_v2" --model_path="/Users/diegomeire//Library/Application Support/tts/tts_models--multilingual--multi-dataset--xtts_v2" --config_path="/Users/diegomeire//Library/Application Support/tts/tts_models--multilingual--multi-dataset--xtts_v2/config.json" --show_details=True  --use_cuda=True
+python server.py --model_name="tts_models/multilingual/multi-dataset/xtts_v2" --show_details=True  --use_cuda=True
 ```
 
-### XTTS server 
+### VITS server 
 #### using CPU
 ```
 cd /TTS/server
@@ -79,6 +79,33 @@ python server.py --model_name="tts_models/en/vctk/vits" --show_details=True --us
 cd /TTS/server
 python server.py --model_name="tts_models/en/vctk/vits" --show_details=True --use_cuda=True
 ```
+
+### Adding a custom model
+Edit the hidden file `.models.json`  and add your entry like:
+
+```
+        "mark": {
+                    "description": "VITS End2End TTS model trained on VCTK dataset with 109 different speakers with EN accent.",
+                    "github_rls_url": [
+                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/config.json",
+                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/speaker_ids.json"	
+                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/model_file.pth",
+                    ],
+                    "default_vocoder": null,
+                    "commit": "3900448",
+                    "author": "Diego Meire",
+                    "license": "apache 2.0",
+                    "contact": "egolge@coqui.ai"
+          },
+```
+In this case, I'm adding this entry to `tts_models/en/vctk`. This will make the server download these files when the call is made:
+`python server.py --model_name="tts_models/en/vctk/mark" --show_details=True --use_cuda=True` 
+
+If the download fails, you can find the location where the models are downloaded to and copy the files manually there. The folder, in this case, is  created with the name `tts_models--en-vctk--mark`. When you find the folder, you can copy the files listed on the json file entry there. 
+On the Mac, the folder is `/Users/{username}/Library/Application\ Support/tts/{folder}`
+On Windows, the folder is `c:\Users\{user}\AppData\Local\tts`
+
+
 
 
 

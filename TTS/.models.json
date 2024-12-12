@@ -228,11 +228,7 @@
                 },
 				"mark": {
                     "description": "VITS End2End TTS model trained on VCTK dataset with 109 different speakers with EN accent.",
-                    "github_rls_url": [
-                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/config.json",
-                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/speaker_ids.json"	
-                    	"https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/model_file.pth",
-                    ],
+                    "github_rls_url": "https://github.com/diegomeire/PebbleAndFriends/blob/main/TTS_Models/tts_models--en--vctk--mark/modelzip",
                     "default_vocoder": null,
                     "commit": "3900448",
                     "author": "Diego Meire",
